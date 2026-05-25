@@ -1,0 +1,43 @@
+{
+  "file": "queries/customer_spend.sql",
+  "reviewed_at": "2026-05-25T18:47:04.940667",
+  "issues_found": 4,
+  "review": {
+    "issues": [
+      {
+        "severity": "Critical",
+        "category": "Correctness",
+        "title": "Incorrect revenue calculation",
+        "line": "SUM(t.amount) as lifetime_value",
+        "problem": "The query calculates lifetime value without considering the transaction status.",
+        "fix": "SUM(CASE WHEN t.status = 'COMPLETED' THEN t.amount ELSE 0 END) as lifetime_value"
+      },
+      {
+        "severity": "Medium",
+        "category": "Correctness",
+        "title": "Missing filter for total orders",
+        "line": "COUNT(t.transaction_id) as total_orders",
+        "problem": "The query counts all transactions without considering the status.",
+        "fix": "COUNT(CASE WHEN t.status = 'COMPLETED' THEN t.transaction_id ELSE NULL END) as total_orders"
+      },
+      {
+        "severity": "Medium",
+        "category": "Readability",
+        "title": "Missing comments",
+        "line": "Entire query",
+        "problem": "The query lacks comments explaining the logic and calculations.",
+        "fix": "Add comments to explain the purpose of each part of the query."
+      },
+      {
+        "severity": "Low",
+        "category": "Readability",
+        "title": "Inconsistent naming",
+        "line": "Entire query",
+        "problem": "The naming of aliases and columns is inconsistent.",
+        "fix": "Use consistent naming conventions for aliases and columns."
+      }
+    ],
+    "corrected_sql": "SELECT c.customer_name, c.email, c.tier,\n       SUM(CASE WHEN t.status = 'COMPLETED' THEN t.amount ELSE 0 END) as lifetime_value,\n       COUNT(CASE WHEN t.status = 'COMPLETED' THEN t.transaction_id ELSE NULL END) as total_orders\nFROM dim_customer c\nLEFT JOIN fact_transactions t ON c.customer_id = t.customer_id\nWHERE t.status = 'COMPLETED'\nGROUP BY c.customer_name, c.email\nHAVING SUM(CASE WHEN t.status = 'COMPLETED' THEN t.amount ELSE 0 END) > 1000\nORDER BY lifetime_value DESC;",
+    "summary": "The query had issues with revenue calculation and total orders count. It also lacked comments and had inconsistent naming."
+  }
+}
