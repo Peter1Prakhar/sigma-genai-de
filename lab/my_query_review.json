@@ -1,0 +1,27 @@
+{
+  "file": "queries/my_query.sql",
+  "reviewed_at": "2026-05-25T18:47:17.373908",
+  "issues_found": 2,
+  "review": {
+    "issues": [
+      {
+        "severity": "Medium",
+        "category": "Correctness",
+        "title": "Missing filter for transaction status",
+        "line": "WHERE clause",
+        "problem": "The query does not filter transactions by status, which means it will include all transactions regardless of their status.",
+        "fix": "WHERE t.status = 'COMPLETED'"
+      },
+      {
+        "severity": "Low",
+        "category": "Readability",
+        "title": "Lack of comments",
+        "line": "Entire query",
+        "problem": "The query lacks comments explaining the purpose and logic, which could be helpful for future maintainers.",
+        "fix": "Add comments to explain the purpose and logic of the query."
+      }
+    ],
+    "corrected_sql": "SELECT c.customer_name, c.email, m.merchant_name, SUM(t.amount) AS merchant_spend, COUNT(*) AS txn_count FROM dim_customer c JOIN fact_transactions t ON c.customer_id = t.customer_id JOIN dim_merchant m ON t.merchant_id = m.merchant_id WHERE c.tier = 'GOLD' AND t.status = 'COMPLETED' GROUP BY c.customer_name, c.email, m.merchant_name ORDER BY merchant_spend DESC;",
+    "summary": "The query is mostly correct but misses a filter for transaction status and lacks comments for readability."
+  }
+}
