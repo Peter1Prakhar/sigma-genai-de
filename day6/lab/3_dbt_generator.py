@@ -36,7 +36,7 @@ GENERATES:
 
 import boto3
 import os
-from sample_data import SCHEMA_COMPACT
+from day6.lab.sample_data import SCHEMA_COMPACT
 
 # ── CONFIGURATION ──────────────────────────────────────────
 bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')

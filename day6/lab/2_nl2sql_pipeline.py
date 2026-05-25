@@ -35,7 +35,7 @@ import re
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from sample_data import SCHEMA_RICH, NL2SQL_QUESTIONS, SNOWFLAKE_CONFIG_TEMPLATE
+from day6.lab.sample_data import SCHEMA_RICH, NL2SQL_QUESTIONS, SNOWFLAKE_CONFIG_TEMPLATE
 
 # ── CONFIGURATION ──────────────────────────────────────────
 bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')

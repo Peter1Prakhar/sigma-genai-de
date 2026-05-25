@@ -30,7 +30,7 @@ HOW TO RUN:
 import boto3
 import json
 from datetime import datetime
-from sample_data import SCHEMA_COMPACT, BROKEN_QUERIES
+from day6.lab.sample_data import SCHEMA_COMPACT, BROKEN_QUERIES
 
 # ── CONFIGURATION ──────────────────────────────────────────
 bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')

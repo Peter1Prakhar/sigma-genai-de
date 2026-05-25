@@ -6,6 +6,7 @@ venv/
 env/
 .env
 .env.local
+.venv-dbt
 
 # API Keys and Credentials — NEVER COMMIT
 *secret*

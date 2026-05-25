@@ -7,8 +7,8 @@ import time
 import json
 import streamlit as st
 
-from helpers import call_llm, Usage
-from sample_data import (
+from day6.demo.helpers import call_llm, Usage
+from day6.demo.sample_data import (
     SIGMA_SCHEMA, SIGMA_SCHEMA_COMPACT, BROKEN_QUERIES,
     NL2SQL_EXAMPLES, DBT_PROJECT_STRUCTURE, DBT_TEST_SCENARIOS,
 )
