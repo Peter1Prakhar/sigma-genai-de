@@ -1,0 +1,6 @@
+#!/Users/as-mac-1358/Downloads/genai_training/day-6/sigma-genai-de/.venv-dbt/bin/python3.11
+import sys
+from pip._internal.cli.main import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())
