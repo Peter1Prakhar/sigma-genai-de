@@ -1,0 +1,47 @@
+PIPELINE SPEC: Transaction Reconciliation Pipeline
+Team Scenario: Team 9 - Transaction Reconciliation Pipeline
+
+OBJECTIVE
+Build a daily reconciliation pipeline that compares Sigma DataTech's internal
+transaction ledger with settlement files from Razorpay, PayU, and Stripe. The
+pipeline should identify matched records, disputed records, and missing records
+before finance closes daily settlement.
+
+DATA SOURCES
+- Internal ledger: transactions for the run date from the Silver layer.
+- Gateway settlement files: one daily CSV each from Razorpay, PayU, and Stripe.
+- Expected join key: transaction_id.
+- Comparison fields: amount, gateway_name, settlement_date, transaction_date.
+
+BRONZE LAYER
+- Ingest all gateway CSV files exactly as received.
+- Preserve raw columns as strings.
+- Add ingestion_timestamp, source_file, gateway_name, and pipeline_run_id.
+- Do not drop unexpected columns; flag schema drift for governance review.
+
+SILVER LAYER
+- Cast amount fields to decimal/float and dates to date.
+- Validate transaction_id is present in both ledger and gateway data.
+- Standardize gateway names to RAZORPAY, PAYU, or STRIPE.
+- Deduplicate gateway records by transaction_id, keeping the latest ingested row.
+
+GOLD LAYER
+- Write reconciliation_detail with one row per transaction_id and gateway.
+- Classification rules:
+  matched = ledger and gateway records exist and amount difference <= 1.
+  disputed = both records exist but amount difference > 1.
+  missing = ledger record exists but gateway record is absent.
+- Write reconciliation_summary by gateway and reconciliation_date with counts
+  for matched, disputed, missing, and total net_variance.
+
+ERROR HANDLING AND GOVERNANCE
+- Halt if any gateway file is missing for the run date.
+- Halt if more than 1% of records have null transaction_id.
+- Alert finance when disputed_count > 0 or abs(net_variance) > 100.
+- Log row counts after ingest, deduplication, join, and Gold writes.
+
+PERFORMANCE AND IDEMPOTENCY
+- Partition outputs by reconciliation_date.
+- Overwrite the partition for the run date on rerun.
+- Broadcast small gateway metadata lookup tables.
+- Parameterize all paths and dates; no hardcoded production paths in functions.

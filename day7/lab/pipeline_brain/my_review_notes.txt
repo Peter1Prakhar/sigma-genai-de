@@ -1,0 +1,16 @@
+Code review fixes applied for Module 5:
+
+1. ERROR_HANDLING
+   Added try/except wrappers around Bronze ingest, Silver transform, and Gold
+   build stages in fixed_pipeline.py. Each stage logs the underlying exception
+   and raises a stage-specific RuntimeError so failures are easier to diagnose.
+
+2. HARDCODED_PATHS
+   Replaced hardcoded paths and run metadata inside functions with a
+   PipelineConfig dataclass. Pipeline functions now receive config values
+   instead of embedding production S3 paths directly in transformation logic.
+
+Additional cleanup:
+- Added row-count logging helper for important transformation checkpoints.
+- Added required-column validation before Bronze/Silver processing.
+- Added missing imports that generated_pipeline.py relied on indirectly.
