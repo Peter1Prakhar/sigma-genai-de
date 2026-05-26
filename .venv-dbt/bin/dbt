@@ -1,0 +1,6 @@
+#!/Users/as-mac-1358/Downloads/genai_training/day-6/sigma-genai-de/.venv-dbt/bin/python
+import sys
+from dbt.cli.main import cli
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(cli())
