@@ -71,6 +71,7 @@ OUTPUT_DIR = "pipeline_brain"
 DRIFTED_COLUMNS = {
     "payment_gateway":  "string",    # new: which payment processor handled the txn
     "discount_amount":  "float",     # new: discount applied at checkout
+    "refund_flag":      "boolean",   # new: whether the transaction was refunded
 }
 
 # ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
@@ -253,7 +254,7 @@ def main():
     report = {
         "simulation": {
             "drifted_columns_injected": DRIFTED_COLUMNS,
-            "description": "payment_gateway and discount_amount appeared in upstream CSV",
+            "description": "payment_gateway, discount_amount, and refund_flag appeared in upstream CSV",
         },
         "original_schema": SCHEMA_BRONZE,
         "drifted_schema":  drifted_schema,
