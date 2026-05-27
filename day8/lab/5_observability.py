@@ -303,10 +303,95 @@ def run_fallback_checks(bronze_df: pd.DataFrame, silver_df: pd.DataFrame, gold_d
         if not drifted_cols:
             f.write("  None detected\n")
 
+    quality_html_path = os.path.join(OBS_DIR, "silver_quality_report.html")
+    drift_html_path = os.path.join(OBS_DIR, "bronze_silver_drift_report.html")
+    _write_fallback_html_reports(
+        quality_html_path,
+        drift_html_path,
+        quality_summary,
+        drift_summary,
+        bronze_df,
+        silver_df,
+        gold_df,
+    )
+
     print(f"[OK] Saved: devops_brain/observability/fallback_quality_report.txt")
+    print(f"[OK] Saved: devops_brain/observability/silver_quality_report.html")
+    print(f"[OK] Saved: devops_brain/observability/bronze_silver_drift_report.html")
     print("  Install Evidently for the full HTML report: pip install evidently")
 
     return quality_summary, drift_summary
+
+
+def _write_fallback_html_reports(
+    quality_html_path: str,
+    drift_html_path: str,
+    quality_summary: dict,
+    drift_summary: dict,
+    bronze_df: pd.DataFrame,
+    silver_df: pd.DataFrame,
+    gold_df: pd.DataFrame,
+) -> None:
+    """Write lightweight HTML reports when Evidently's legacy API is unavailable."""
+    null_rows = "\n".join(
+        f"<tr><td>{col}</td><td>{pct:.2f}%</td></tr>"
+        for col, pct in quality_summary["null_rates_pct"].items()
+    )
+    status_rows = "\n".join(
+        f"<tr><td>{status}</td><td>{count}</td></tr>"
+        for status, count in quality_summary["status_counts"].items()
+    )
+    merchant_rows = "\n".join(
+        f"<tr><td>{row['merchant_name']}</td><td>{row['total_revenue']}</td><td>{row['failure_rate_pct']}</td></tr>"
+        for _, row in gold_df.iterrows()
+    )
+
+    quality_html = f"""<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Silver Quality Report</title>
+<style>body{{font-family:Arial,sans-serif;margin:32px}}table{{border-collapse:collapse}}td,th{{border:1px solid #ddd;padding:6px 10px}}th{{background:#f4f4f4}}</style></head>
+<body>
+<h1>Silver Quality Report</h1>
+<p>Fallback HTML generated from pandas checks because Evidently's legacy Report API is unavailable.</p>
+<ul>
+  <li>Total rows: {quality_summary['total_rows']}</li>
+  <li>Total columns: {quality_summary['total_columns']}</li>
+  <li>Amount range: {quality_summary['amount_min']} to {quality_summary['amount_max']}</li>
+  <li>Amount mean: {quality_summary['amount_mean']}</li>
+</ul>
+<h2>Null Rates</h2>
+<table><tr><th>Column</th><th>Null Rate</th></tr>{null_rows}</table>
+<h2>Status Distribution</h2>
+<table><tr><th>Status</th><th>Count</th></tr>{status_rows}</table>
+<h2>Gold Merchant Health</h2>
+<table><tr><th>Merchant</th><th>Total Revenue</th><th>Failure Rate %</th></tr>{merchant_rows}</table>
+</body></html>"""
+
+    drift_rows = "\n".join(
+        f"<tr><td>{col}</td><td>{'DRIFTED' if col in drift_summary['drifted_columns'] else 'OK'}</td></tr>"
+        for col in drift_summary["columns_compared"]
+    )
+    drift_html = f"""<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Bronze Silver Drift Report</title>
+<style>body{{font-family:Arial,sans-serif;margin:32px}}table{{border-collapse:collapse}}td,th{{border:1px solid #ddd;padding:6px 10px}}th{{background:#f4f4f4}}</style></head>
+<body>
+<h1>Bronze to Silver Drift Report</h1>
+<p>Fallback HTML generated from pandas set comparisons.</p>
+<ul>
+  <li>Bronze rows: {len(bronze_df)}</li>
+  <li>Silver rows: {len(silver_df)}</li>
+  <li>Rows dropped: {len(bronze_df) - len(silver_df)}</li>
+  <li>Dataset drifted: {drift_summary['dataset_drifted']}</li>
+  <li>Drift share: {drift_summary['drift_share']}</li>
+</ul>
+<table><tr><th>Column</th><th>Status</th></tr>{drift_rows}</table>
+</body></html>"""
+
+    with open(quality_html_path, "w", encoding="utf-8") as f:
+        f.write(quality_html)
+    with open(drift_html_path, "w", encoding="utf-8") as f:
+        f.write(drift_html)
 
 
 # ── Step 4: Bedrock DataOps Morning Report ────────────────────────────────────
