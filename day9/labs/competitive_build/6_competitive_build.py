@@ -39,6 +39,8 @@ import subprocess
 import tempfile
 from datetime import datetime
 
+
+
 # Windows UTF-8 stdout fix
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -57,6 +59,7 @@ REGION        = "us-east-1"
 SCRIPT_DIR      = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR      = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "output"))
 COMPETITIVE_DIR = OUTPUT_DIR   # all sprint outputs go to labs/output/
+DEVOPS_BRAIN_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "devops_brain")) # Add this line
 CHALLENGE_PATH  = os.path.join(SCRIPT_DIR, "challenge_pipeline.py")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -483,9 +486,9 @@ into the test file so it runs without any imports from challenge_pipeline.
         output = proc.stdout + proc.stderr
 
         # Count tests that were collected and ran (passed or failed — not errors)
-        passed_count = output.count(" passed") + output.count(" PASSED")
-        failed_count = output.count(" failed") + output.count(" FAILED")
-        error_count  = output.count(" error")
+        passed_count = sum(int(n) for n in re.findall(r"(\d+)\s+passed", output, flags=re.IGNORECASE))
+        failed_count = sum(int(n) for n in re.findall(r"(\d+)\s+failed", output, flags=re.IGNORECASE))
+        error_count  = sum(int(n) for n in re.findall(r"(\d+)\s+error", output, flags=re.IGNORECASE))
         ran          = passed_count + failed_count
 
         passed = ran >= 2

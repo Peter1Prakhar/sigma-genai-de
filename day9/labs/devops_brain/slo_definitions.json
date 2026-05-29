@@ -1,0 +1,29 @@
+{
+  "slo_context": {
+    "purpose": "Define health expectations for the Sigma DataTech Bronze-to-Silver pipeline.",
+    "review_cadence": "Weekly",
+    "owner": "DataOps Team"
+  },
+  "data_freshness_slo": {
+    "threshold_hours": 12,
+    "reasoning": "Daily financial dashboards need data refreshed before the next business day.",
+    "breach_impact": "Stale transaction data would cause merchant reports and financial KPIs to be inaccurate."
+  },
+  "quality_threshold_slo": {
+    "threshold_pct": 95.0,
+    "reasoning": "At least 95% of Silver records should pass quality checks to maintain trusted analytics.",
+    "breach_impact": "Low data quality would erode confidence in downstream dashboards and reporting."
+  },
+  "row_count_slo": {
+    "min_rows": 15,
+    "max_rows": 30,
+    "buffer_pct": 20.0,
+    "reasoning": "The dataset processes about 21 rows per day, so this buffer covers normal variation.",
+    "breach_impact": "Unexpected row counts may indicate missing data, duplicates, or pipeline failure."
+  },
+  "pipeline_runtime_slo": {
+    "threshold_minutes": 30,
+    "reasoning": "A daily batch pipeline should complete quickly enough to deliver timely reporting.",
+    "breach_impact": "Slow pipeline execution delays analytics delivery and masks upstream failures."
+  }
+}
